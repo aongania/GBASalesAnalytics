@@ -315,7 +315,7 @@ def update_page(n_intervals, data):
     #global mod_time
     global df
     global df_targets
-    new_mod_time = os.path.getmtime('./Vendas2023.xlsx')
+    new_mod_time = os.path.getmtime(data_file)
 
     if data:
         #print(f'browser_mod_time es {data['browser_mod_time']}')
