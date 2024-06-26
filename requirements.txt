@@ -4,6 +4,7 @@ dash-bootstrap-templates==1.1.2
 dash-core-components==2.0.0
 dash-html-components==2.0.0
 dash-table==5.0.0
+dash_ag_grid
 et-xmlfile==1.1.0
 gunicorn
 numpy
