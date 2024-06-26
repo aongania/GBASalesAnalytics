@@ -97,7 +97,7 @@ app.layout = html.Div([
 )
 def change_page(href):
     #print('EJECUTANDO CHANGE PAGE')  
-    title = f'Dashboard {href.split('/')[3]}'
+    title = f"Dashboard {href.split('/')[3]}"
     if title == 'Dashboard ':
         title = 'Dashboard Resultados'
     return title
