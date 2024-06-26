@@ -54,7 +54,7 @@ data_file = DATA_PATH.joinpath('Vendas2023.xlsx')
 
 df = pd.read_excel(data_file, sheet_name='Dados')
 df_targets = pd.read_excel(data_file, sheet_name='Metas')
-mod_time = os.path.getmtime('./Vendas2023.xlsx')
+mod_time = os.path.getmtime(data_file)
 
 # ========= Função dos Filtros ========= #
 start_month = 1
