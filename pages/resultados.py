@@ -194,6 +194,11 @@ layout = html.Div(children=[
         dbc.Col([
             dbc.Card([
                 dbc.CardBody([
+                    # dbc.Row(
+                    #     dbc.Col(
+                    #         html.Legend('Faturamento', className='bdc', style={'font-size': '15px'})
+                    #     )
+                    # ),
                     dbc.Row([
                         dbc.Col([
                             dcc.Loading([
@@ -299,6 +304,13 @@ layout = html.Div(children=[
                 ], style={'text-align': 'center'})
             ], style=tab_card)
         ])
+        # dbc.Col([
+        #     dbc.Card([
+        #         dbc.CardBody([
+        #             dcc.Graph(id='graph6', className='dbc', config=config_graph)
+        #         ], style={'text-align': 'center'})
+        #     ], style=tab_card)
+        # ], sm=12, md=5)
     ], className='g-2 my-auto', style={'margin-top': '7px'})    
 ], style={'padding-top': '0px'}, className="dbc")
 
@@ -312,13 +324,13 @@ layout = html.Div(children=[
         State('mod-time', 'data')
 )
 def update_page(n_intervals, data):
-    #print(f'Ejecutada {n_intervals} veces por {ctx.triggered_id}')
+    print(f'Ejecutada {n_intervals} veces por {ctx.triggered_id}')
     global df
     global df_targets
     new_mod_time = os.path.getmtime(data_file)
 
     if data:
-        #print(f'browser_mod_time es {data['browser_mod_time']}')
+        print(f'browser_mod_time es {data['browser_mod_time']}')
         if new_mod_time != data['browser_mod_time']:
             data['browser_mod_time'] = new_mod_time
             # ========== Re-Reading DATA ============ #
@@ -333,7 +345,7 @@ def update_page(n_intervals, data):
         else:
             return no_update, no_update
     else:
-        #print('SE EJECUTA POR PRIMERA VEZ')
+        print('SE EJECUTA POR PRIMERA VEZ')
         data = {'browser_mod_time': new_mod_time}
         #print(f'BROWSER_MOD_TIME es {data['browser_mod_time']}')
         #print(f'DATA NO tenia valor y browser_mod_time es {data['browser_mod_time']}')
@@ -380,9 +392,11 @@ def update_charts(_, month_range, empresa, receita, toggle):
                 y=df_3['Faturamento']/1000000,
                 hovertemplate="%{data.name}: R%{y:$.2f}M<extra></extra>",
                 name = empresa_temp,
-                showlegend = True,
-                textposition='auto'
-                #text=df_3['Faturamento']/1000000
+                showlegend = False,
+                textposition='inside',
+                text=empresa_temp,
+                texttemplate="%{text}: R%{y:$.2f}M",
+                textfont=dict(size=14)
             )
         )
     fig1 = go.Figure(data=data)
@@ -408,7 +422,11 @@ def update_charts(_, month_range, empresa, receita, toggle):
                 y=df_3['Faturamento']/1000000,
                 hovertemplate="%{data.name}: R%{y:$.2f}M<extra></extra>",
                 name = receita_temp,
-                showlegend = True
+                showlegend = False,
+                textposition='inside',
+                text=receita_temp,
+                texttemplate="%{text}: R%{y:$.2f}M",
+                textfont=dict(size=14)
             )
         )
     fig3 = go.Figure(data=data)
