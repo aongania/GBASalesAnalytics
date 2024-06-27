@@ -1,6 +1,4 @@
 from dash import html, dcc, Input, Output, State, ctx, callback, no_update
-from dash.exceptions import PreventUpdate
-import dash
 import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
@@ -9,16 +7,10 @@ import datetime
 import pathlib
 import os
 
+from pages import home
+
 # import from folders/theme changer
 from dash_bootstrap_templates import ThemeSwitchAIO
-
-# Regsiter page in dash registry
-dash.register_page(__name__,
-                   path='/',
-                   name='Resultados',
-                   title='Resultados',
-                   image='meta_img.png',
-                   description='Data Analitycs by GB Advisors')
 
 # ========== Styles ============ #
 tab_card = {'height': '100%'}
@@ -67,7 +59,6 @@ def df_filter(start_month, end_month, empresa, receita):
     if receita == 'Total':
         receita = '.*'
     
-    #mask = df[df['Mês'].astype(str).str.contains(month) & df['Empresa'].str.contains(empresa) & df['Tipo Receita'].str.contains(receita)]
     mask = df[df['Mês'].between(start_month, end_month) & df['Empresa'].str.contains(empresa) & df['Tipo Receita'].str.contains(receita)]
     return mask
 
@@ -76,7 +67,6 @@ def meta_filter(start_month, end_month, empresa):
     if empresa == 'Grupo':
         empresa = '.*'
     
-    #mask = df_targets[df_targets['Mês'].astype(str).str.contains(month) & df_targets['Empresa'].str.contains(empresa)]
     mask = df_targets[df_targets['Mês'].between(start_month, end_month) & df_targets['Empresa'].str.contains(empresa)]
     return mask
 
@@ -96,6 +86,37 @@ def get_selects(df):
 
     return options_month, options_empresas, options_receita
 
+# ========== Months to text ===============#
+def month_to_text(month_number):
+    match month_number:
+        case 1:
+            month_text = 'Jan'
+        case 2:
+            month_text = 'Fev'
+        case 3:
+            month_text = 'Mar'
+        case 4:
+            month_text = 'Abr'
+        case 5:
+            month_text = 'Mai'
+        case 6:
+            month_text = 'Jun'
+        case 7:
+            month_text = 'Jul'
+        case 8:
+            month_text = 'Ago'
+        case 9:
+            month_text = 'Set'
+        case 10:
+            month_text = 'Out'
+        case 11:
+            month_text = 'Nov'
+        case 12:
+            month_text = 'Dez'
+
+    return month_text
+        
+
 # ========== Defining de NavBar ============ #
 options_month, options_empresa, options_receita = get_selects(df)
 
@@ -110,13 +131,6 @@ sidebar = html.Div(
         html.Hr(className='dbc sidebar-page-hr'),
         html.Div([
             dbc.Label('Janela de tempo (Meses)', class_name='dbc sidebar-page-label'),
-            # dbc.Select(
-            #     id='select-month',
-            #     options=options_month,
-            #     value=0,
-            #     placeholder='Full Year',
-            #     class_name='sidebar-select-control dbc'
-            # ),
             dcc.RangeSlider(1, 12, 1, value=[1, 12], id='month-range-slider', className='dbc px-2 sidebar-range-slider'),
             dbc.Label('Empresa', class_name='sidebar-page-label dbc'),
             dbc.Select(
@@ -180,11 +194,6 @@ layout = html.Div(children=[
         dbc.Col([
             dbc.Card([
                 dbc.CardBody([
-                    dbc.Row(
-                        dbc.Col(
-                            html.Legend('Faturamento', className='bdc')
-                        )
-                    ),
                     dbc.Row([
                         dbc.Col([
                             dcc.Loading([
@@ -290,29 +299,20 @@ layout = html.Div(children=[
                 ], style={'text-align': 'center'})
             ], style=tab_card)
         ])
-        # dbc.Col([
-        #     dbc.Card([
-        #         dbc.CardBody([
-        #             dcc.Graph(id='graph6', className='dbc', config=config_graph)
-        #         ], style={'text-align': 'center'})
-        #     ], style=tab_card)
-        # ], sm=12, md=5)
     ], className='g-2 my-auto', style={'margin-top': '7px'})    
 ], style={'padding-top': '0px'}, className="dbc")
 
 
 # ======== Callbacks ========== #
-# Interval End
+# When Interval Ends
 @callback(
         Output('time-updated', 'children'),
         Output('mod-time', 'data'),
-        Output('selects_from_page', 'data'),
         Input('interval-component', 'n_intervals'),
         State('mod-time', 'data')
 )
 def update_page(n_intervals, data):
     #print(f'Ejecutada {n_intervals} veces por {ctx.triggered_id}')
-    #global mod_time
     global df
     global df_targets
     new_mod_time = os.path.getmtime(data_file)
@@ -329,44 +329,19 @@ def update_page(n_intervals, data):
             new_label_updated = html.Label(f'Úlltima atualização: {str(new_time)[:8]}')
             #print(f'DATA tenia valor y browser_mod_time es {data['browser_mod_time']}')
             #print(f'DATA tenia valor y new_mod_time es {new_mod_time}')
-            return new_label_updated, data, no_update
+            return new_label_updated, data
         else:
-            return no_update, no_update, no_update
+            return no_update, no_update
     else:
         #print('SE EJECUTA POR PRIMERA VEZ')
         data = {'browser_mod_time': new_mod_time}
         #print(f'BROWSER_MOD_TIME es {data['browser_mod_time']}')
         #print(f'DATA NO tenia valor y browser_mod_time es {data['browser_mod_time']}')
         #print(f'DATA NO tenia valor y new_mod_time es {new_mod_time}')
-        data_selects = [
-            dbc.Label('Mês', class_name='sidebar-label dbc'),
-            dbc.Select(
-                id='select-month',
-                options=options_month,
-                value=0,
-                placeholder='Full Year',
-                class_name='sidebar-select-control dbc'
-            ),
-            dbc.Label('Empresa', class_name='sidebar-label dbc'),
-            dbc.Select(
-                id='select-empresa',
-                options=options_empresa,
-                value='Grupo',
-                placeholder='Grupo',
-                class_name='sidebar-select-control dbc'
-            ),
-            dbc.Label('Receita', class_name='sidebar-label dbc'),
-            dbc.Select(
-                id='select-receita',
-                options=options_receita,
-                value='Total',
-                placeholder='Total',
-                class_name='sidebar-select-control dbc'
-            )
-        ]
 
-        return no_update, data, data_selects
+        return no_update, data
 
+# Update graphs and tables when filters change
 @callback(
     Output('graph1', 'figure'),
     Output('graph2', 'figure'),
@@ -375,21 +350,22 @@ def update_page(n_intervals, data):
     Output('customer-table', 'rowData'),
     Output('logo-select', 'src'),
     Output('graph6', 'figure'),
+    Output('graph4', 'figure'),
+    Output('graph5', 'figure'),
+    Output('meta-total', 'children'),
+    Output('delta-total', 'children'),
     Input('time-updated', 'children'),
     Input('month-range-slider', 'value'),
     Input('select-empresa', 'value'),
     Input('select-receita', 'value'),
     Input(ThemeSwitchAIO.ids.switch("themes"), "value")
 )
-def graph1(_, month_range, empresa, receita, toggle):
+def update_charts(_, month_range, empresa, receita, toggle):
     #print(f'Callback 1 Ejecutada por {ctx.triggered_id}')
     template = template_theme1 if toggle else template_theme2 # Changes theme
 
-    #print(f'rango de meses es {month_range}')
     start_month = month_range[0]
     end_month = month_range[1]
-    #print(f'start_month es {start_month}')
-    #print(f'end month es {end_month}')
 
     df_1 = df_filter(start_month, end_month, empresa, receita)
     df_2 = df_1.groupby(['Empresa'])['Faturamento'].sum().reset_index()
@@ -404,11 +380,13 @@ def graph1(_, month_range, empresa, receita, toggle):
                 y=df_3['Faturamento']/1000000,
                 hovertemplate="%{data.name}: R%{y:$.2f}M<extra></extra>",
                 name = empresa_temp,
-                showlegend = True
+                showlegend = True,
+                textposition='auto'
+                #text=df_3['Faturamento']/1000000
             )
         )
     fig1 = go.Figure(data=data)
-    fig1.update_layout(main_config, autosize=True, title='Por Empresa', height=200, template=template, barmode='stack', showlegend=True)
+    fig1.update_layout(main_config, autosize=True, title='Faturamento por Empresa', height=250, template=template, barmode='stack')
 
     #fig Dsitribução de receita por empresa
     fig2 = go.Figure(go.Pie(labels=df_2['Empresa'], values=df_2['Faturamento']/1000000, 
@@ -416,7 +394,7 @@ def graph1(_, month_range, empresa, receita, toggle):
                             text=df_2['Empresa'],
                             hole=.6,
                             hovertemplate='%{label}: R%{value:$.2f}M<br>%{percent}</br><extra></extra>'))
-    fig2.update_layout(main_config, height=200, template=template, showlegend=False)
+    fig2.update_layout(main_config, height=250, template=template, showlegend=False)
 
     df_2 = df_1.groupby(['Tipo Receita'])['Faturamento'].sum().reset_index()
 
@@ -434,7 +412,7 @@ def graph1(_, month_range, empresa, receita, toggle):
             )
         )
     fig3 = go.Figure(data=data)
-    fig3.update_layout(main_config, autosize=True, title='Por Tipo de Receita', height=200, template=template, barmode='stack', showlegend=True)
+    fig3.update_layout(main_config, autosize=True, title='Por Tipo de Receita', height=250, template=template, barmode='stack', showlegend=True)
 
     #Select Total Faturamento
     fat_total = df_1['Faturamento'].sum()/1000000
@@ -456,7 +434,7 @@ def graph1(_, month_range, empresa, receita, toggle):
     df_pie = pd.DataFrame(df_pie_data, columns=['Grupo', 'Faturamento'])
     
     fig6 = go.Figure(go.Pie(labels=df_pie['Grupo'], values=df_pie['Faturamento']/1000000, 
-                             textposition='inside',
+                             textposition='auto',
                              text=df_pie['Grupo'],
                              hole=0,
                              showlegend=True,
@@ -485,46 +463,31 @@ def graph1(_, month_range, empresa, receita, toggle):
     src_logo = f'assets/{logo}'
     select4 = src_logo
 
-    return fig1, fig2, fig3, select3, table_data, select4, fig6
-
-# Graph 4 & 5
-@callback(
-    Output('graph4', 'figure'),
-    Output('graph5', 'figure'),
-    Output('meta-total', 'children'),
-    Output('delta-total', 'children'),
-    Input('time-updated', 'children'),
-    Input('select-empresa', 'value'),
-    Input(ThemeSwitchAIO.ids.switch("themes"), "value")
-)
-def graph4(_, empresa, toggle):
-    #print(f'Callback 2 Ejecutada por {ctx.triggered_id}')
-    template = template_theme1 if toggle else template_theme2
-    
-    df_1 = df_filter(1, 12, empresa, 'Recorrente')
-    df_2 = df_1.groupby(['Mês', 'Empresa'])['Faturamento'].sum().reset_index()
-    df_3 = meta_filter(1, 12, empresa)
+    # Charts Row 2
+    df_3 = meta_filter(start_month, end_month, empresa)
     df_4 = df_3.groupby('Mês')['Meta'].sum().reset_index()
-    
+    df_5 = df_filter(start_month, end_month, empresa, 'Recorrente')
+    df_6 = df_5.groupby(['Mês', 'Empresa'])['Faturamento'].sum().reset_index()
+
     # Faturamento mensal vs Meta
     fig_data = [go.Scatter(x=df_4['Mês'],
                            y=df_4['Meta']/1000000,
                            mode='lines+markers',
                            hovertemplate="%{data.name}:<br>R%{y:$.2f}M<extra></extra>",
                            name='Meta')]
-    for i in df_2['Empresa'].unique():
-        df_5 = df_2[df_2['Empresa'] == i]
-        fig_data.append(go.Bar(x=df_5['Mês'],
-                               y=df_5['Faturamento']/1000000,
+    for i in df_6['Empresa'].unique():
+        df_7 = df_6[df_6['Empresa'] == i]
+        fig_data.append(go.Bar(x=df_7['Mês'],
+                               y=df_7['Faturamento']/1000000,
                                hovertemplate="%{data.name}:<br>R%{y:$.2f}M<extra></extra>",
                                name=f'Faturamento {i}'))
     
     fig4 = go.Figure(data=fig_data)
-    fig4.update_layout(main_config, xaxis={"dtick":1, 'titlefont': {'size': 5}}, title='Faturamento vs Meta', xaxis_title='Meses', yaxis_title='Milhões $R', height=200, template=template, barmode='stack', showlegend=True)
+    fig4.update_layout(main_config, xaxis={"dtick":1, 'titlefont': {'size': 5}}, title='Receita Recorrente vs Meta', xaxis_title='Meses', yaxis_title='Milhões $R', height=200, template=template, barmode='stack', showlegend=True)
 
     #fig Atingimento da Meta
     meta_value = df_4['Meta'].sum()/1000000
-    fat_value = df_1['Faturamento'].sum()/1000000
+    fat_value = df_5['Faturamento'].sum()/1000000
     #bar color
     if fat_value < meta_value * 0.7:
         bar_color = '#e74c3c' #red
@@ -561,4 +524,5 @@ def graph4(_, empresa, toggle):
     #select Gap para atingir a Meta
     select2 = html.H3(f'R${fat_value - meta_value:,.2f}M', style={'color': color})
 
-    return fig4, fig5, select, select2
+    return fig1, fig2, fig3, select3, table_data, select4, fig6, fig4, fig5, select, select2
+
