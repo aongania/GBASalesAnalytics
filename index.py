@@ -2,7 +2,7 @@ from dash import html, dcc, Input, Output, State, callback, no_update
 import dash_bootstrap_components as dbc
 from dash_bootstrap_templates import load_figure_template
 from pages import home, resultados, financeiro, comercial
-from app import app
+from app import app, server
 
 # import from folders/theme changer
 from dash_bootstrap_templates import ThemeSwitchAIO
