@@ -324,13 +324,13 @@ layout = html.Div(children=[
         State('mod-time', 'data')
 )
 def update_page(n_intervals, data):
-    print(f'Ejecutada {n_intervals} veces por {ctx.triggered_id}')
+    #print(f'Ejecutada {n_intervals} veces por {ctx.triggered_id}')
     global df
     global df_targets
     new_mod_time = os.path.getmtime(data_file)
 
     if data:
-        print(f'browser_mod_time es {data['browser_mod_time']}')
+        #print(f'browser_mod_time es {data['browser_mod_time']}')
         if new_mod_time != data['browser_mod_time']:
             data['browser_mod_time'] = new_mod_time
             # ========== Re-Reading DATA ============ #
@@ -345,7 +345,7 @@ def update_page(n_intervals, data):
         else:
             return no_update, no_update
     else:
-        print('SE EJECUTA POR PRIMERA VEZ')
+        #print('SE EJECUTA POR PRIMERA VEZ')
         data = {'browser_mod_time': new_mod_time}
         #print(f'BROWSER_MOD_TIME es {data['browser_mod_time']}')
         #print(f'DATA NO tenia valor y browser_mod_time es {data['browser_mod_time']}')
