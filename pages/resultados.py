@@ -31,10 +31,10 @@ main_config = {
 #config_graph={"displayModeBar": True, "showTips": False, "displaylogo": False}
 config_graph={"showTips": False, "displayModeBar": False, "displaylogo": False}
 
-template_theme1 = "flatly"
-template_theme2 = "darkly"
-url_theme1 = dbc.themes.FLATLY
-url_theme2 = dbc.themes.DARKLY
+#template_theme1 = "flatly"
+#template_theme2 = "darkly"
+#url_theme1 = dbc.themes.FLATLY
+#url_theme2 = dbc.themes.DARKLY
 
 # ========== Defining global variables ============ #
 now = datetime.datetime.now() # get time of last update
@@ -124,7 +124,7 @@ sidebar = html.Div(
     [
         html.Div(
             [
-                html.H4(" Filters", className='bi bi-funnel'),
+                html.H4(" Filtros", className='bi bi-funnel'),
             ],
             className="dbc sidebar-page-header",
         ),
@@ -173,7 +173,7 @@ layout = html.Div(children=[
                     ], style={'margin-top': '0px'}),
                     dbc.Row([
                         dbc.Col([  
-                            html.H4("Sales Analytics", className='bdc')
+                            html.H4("Data Analytics", className='bdc pt-3')
                         ], align='start')
                     ]),
                     dbc.Row([
@@ -194,11 +194,12 @@ layout = html.Div(children=[
         dbc.Col([
             dbc.Card([
                 dbc.CardBody([
-                    # dbc.Row(
-                    #     dbc.Col(
-                    #         html.Legend('Faturamento', className='bdc', style={'font-size': '15px'})
-                    #     )
-                    # ),
+                    dbc.Row(
+                        dbc.Col([
+                            html.H4('Faturamento', className='bdc'),
+                            html.Hr()
+                        ])
+                    ),
                     dbc.Row([
                         dbc.Col([
                             dcc.Loading([
@@ -287,7 +288,7 @@ layout = html.Div(children=[
                             html.H4('Top 5 Clientes', className='dbc'),
                             dag.AgGrid(id='customer-table',
                                 columnSize="responsiveSizeToFit",
-                                columnDefs = [{'field': 'Grupo',
+                                columnDefs = [{'field': 'Cliente',
                                             'columnStyle': {'justify-content': 'center'}},
                                             {'field': 'Faturamento',
                                             'columnStyle': {'justify-content': 'center'},
@@ -374,7 +375,7 @@ def update_page(n_intervals, data):
 )
 def update_charts(_, month_range, empresa, receita, toggle):
     #print(f'Callback 1 Ejecutada por {ctx.triggered_id}')
-    template = template_theme1 if toggle else template_theme2 # Changes theme
+    template = home.template_theme1 if toggle else home.template_theme2 # Changes theme
 
     start_month = month_range[0]
     end_month = month_range[1]
@@ -390,29 +391,30 @@ def update_charts(_, month_range, empresa, receita, toggle):
             go.Bar(
                 x=['Empresa'],
                 y=df_3['Faturamento']/1000000,
-                hovertemplate="%{data.name}: R%{y:$.2f}M<extra></extra>",
+                #hovertemplate="%{data.name}: R%{y:$.2f}M<extra></extra>",
+                hovertemplate="R%{y:$.2f}M<extra></extra>",
                 name = empresa_temp,
                 showlegend = False,
                 textposition='inside',
                 text=empresa_temp,
-                texttemplate="%{text}: R%{y:$.2f}M",
+                texttemplate="%{text}",
                 textfont=dict(size=14)
             )
         )
     fig1 = go.Figure(data=data)
-    fig1.update_layout(main_config, autosize=True, title='Faturamento por Empresa', height=250, template=template, barmode='stack')
+    fig1.update_layout(main_config, autosize=True, title='Por Empresa', height=250, template=template, barmode='stack')
 
     #fig Dsitribução de receita por empresa
     fig2 = go.Figure(go.Pie(labels=df_2['Empresa'], values=df_2['Faturamento']/1000000, 
                             textposition='auto',
                             text=df_2['Empresa'],
                             hole=.6,
-                            hovertemplate='%{label}: R%{value:$.2f}M<br>%{percent}</br><extra></extra>'))
+                            #hovertemplate='%{label}: R%{value:$.2f}M<br>%{percent}</br><extra></extra>'))
+                            hovertemplate='R%{value:$.2f}M<extra></extra>'))
     fig2.update_layout(main_config, height=250, template=template, showlegend=False)
 
-    df_2 = df_1.groupby(['Tipo Receita'])['Faturamento'].sum().reset_index()
-
     #fig Faturamento por tipo de receita
+    df_2 = df_1.groupby(['Tipo Receita'])['Faturamento'].sum().reset_index()
     data = []
     for receita_temp in df_2['Tipo Receita'].unique():
         df_3 = df_2[df_2['Tipo Receita'].str.contains(receita_temp)]
@@ -420,17 +422,19 @@ def update_charts(_, month_range, empresa, receita, toggle):
             go.Bar(
                 x=['Receita'],
                 y=df_3['Faturamento']/1000000,
-                hovertemplate="%{data.name}: R%{y:$.2f}M<extra></extra>",
+                #hovertemplate="%{data.name}: R%{y:$.2f}M<extra></extra>",
+                hovertemplate="R%{y:$.2f}M<extra></extra>",
                 name = receita_temp,
                 showlegend = False,
                 textposition='inside',
                 text=receita_temp,
-                texttemplate="%{text}: R%{y:$.2f}M",
+                #texttemplate="%{text}: R%{y:$.2f}M",
+                texttemplate="%{text}",
                 textfont=dict(size=14)
             )
         )
     fig3 = go.Figure(data=data)
-    fig3.update_layout(main_config, autosize=True, title='Por Tipo de Receita', height=250, template=template, barmode='stack', showlegend=True)
+    fig3.update_layout(main_config, autosize=True, title='Por Receita', height=250, template=template, barmode='stack', showlegend=True)
 
     #Select Total Faturamento
     fat_total = df_1['Faturamento'].sum()/1000000
@@ -438,7 +442,7 @@ def update_charts(_, month_range, empresa, receita, toggle):
     select3 = html.H4(f'R${fat_total:,.2f}M')
 
     #table Top 5 Clientes
-    df_faturamento = df_1.groupby(['Grupo'])['Faturamento'].sum().sort_values(ascending=False).reset_index()
+    df_faturamento = df_1.groupby(['Cliente'])['Faturamento'].sum().sort_values(ascending=False).reset_index()
     df_table = df_faturamento.iloc[:5]
     table_data = df_table.to_dict('records')
 
@@ -449,15 +453,16 @@ def update_charts(_, month_range, empresa, receita, toggle):
     value_pie_others_fat = df_faturamento.iloc[5:]['Faturamento'].sum()
     
     df_pie_data = [['Top 5 Clientes', value_pie_top_5], ['Others', value_pie_others_fat]]
-    df_pie = pd.DataFrame(df_pie_data, columns=['Grupo', 'Faturamento'])
+    df_pie = pd.DataFrame(df_pie_data, columns=['Cliente', 'Faturamento'])
     
-    fig6 = go.Figure(go.Pie(labels=df_pie['Grupo'], values=df_pie['Faturamento']/1000000, 
+    fig6 = go.Figure(go.Pie(labels=df_pie['Cliente'], values=df_pie['Faturamento']/1000000, 
                              textposition='auto',
-                             text=df_pie['Grupo'],
+                             text=df_pie['Cliente'],
                              hole=0,
-                             showlegend=True,
+                             showlegend=False,
                              #textinfo='none',
-                             hovertemplate='%{label}: R%{value:$.2f}M<br>%{percent}</br><extra></extra>'))
+                             #hovertemplate='%{label}: R%{value:$.2f}M<br>%{percent}</br><extra></extra>'))
+                             hovertemplate='R%{value:$.2f}M<extra></extra>'))
     fig6.update_layout(main_config,
                        legend= {
                                 'orientation': "h",
@@ -473,7 +478,7 @@ def update_charts(_, month_range, empresa, receita, toggle):
                         autosize=True)
 
     #select Muda Logo segundo o template
-    if template == template_theme1:
+    if template == home.template_theme1:
         logo = 'Logo-white.png'
     else:
         logo = 'Logo-black.png'
@@ -498,7 +503,8 @@ def update_charts(_, month_range, empresa, receita, toggle):
         fig_data.append(go.Bar(x=df_7['Mês'],
                                y=df_7['Faturamento']/1000000,
                                hovertemplate="%{data.name}:<br>R%{y:$.2f}M<extra></extra>",
-                               name=f'Faturamento {i}'))
+                               #name=f'Faturamento {i}'))
+                               name=f'{i}'))
     
     fig4 = go.Figure(data=fig_data)
     fig4.update_layout(main_config, xaxis={"dtick":1, 'titlefont': {'size': 5}}, title='Receita Recorrente vs Meta', xaxis_title='Meses', yaxis_title='Milhões $R', height=200, template=template, barmode='stack', showlegend=True)

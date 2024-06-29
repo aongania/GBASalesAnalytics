@@ -45,12 +45,13 @@ layout = html.Div([
     dbc.Container([
         dbc.Row([
             dbc.Col([
-                html.H4(id='actual-page', className='bdc')
-            ]),
+                html.H4(id='home-actual-page', className='bdc home-actual-page')
+            ], xs=12, md=6, className='bdc d-flex align-items-center'),
             dbc.Col([
-                html.Label(id='selected-filters', className='bdc text-right', style={'font-size': '12px'})
-            ])
-        ], className='page-title dbc bg-secondary text-white p-2 text-center fixed-top'),
+                #html.Label(id='selected-filters', className='bdc w-100 pe-md-5 pe-xs-0 text-center text-md-end text-xs-1')
+                html.Label(id='selected-filters', className='bdc selected-filters')
+            ], xs=12, md=6, className='bdc d-flex align-items-center')
+        ], className='page-title dbc bg-secondary text-white fixed-top'),
         dbc.Row([
             dbc.Col(
                 [
@@ -63,7 +64,7 @@ layout = html.Div([
 
 #========== Callbacks ===========#
 @app.callback(
-    Output('actual-page', 'children'),
+    Output('home-actual-page', 'children'),
     Output('page-contents', 'children'),
     Input('url', 'pathname')
 )
