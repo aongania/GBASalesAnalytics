@@ -33,6 +33,37 @@ div.Select-control {
     color: white !important;
 }
 
+.selected-filters {
+  font-size: 10px;
+  width: 100%;
+  padding-right: 0px;
+  text-align: center;
+}
+
+.home-actual-page {
+  font-size: larger;
+  width: 100%;
+  margin-bottom: 0px;
+  padding-left: 0px;
+  text-align: center;
+}
+
+/*Una vez alcance el max-with o menor realiza el cambio*/
+@media screen and (min-width: 768px) {
+  .selected-filters {
+      padding-right: 60px;
+      text-align: right;
+  }
+  .home-actual-page {
+    padding-left: 60px;
+    text-align: left;
+  }
+
+  #menu-up{
+      display: none;
+  }
+}
+
 /* ================ Centrando os headers da Ag Grid ===============*/
 .ag-header-cell-label {
     justify-content: center;
@@ -141,7 +172,7 @@ div.Select-control {
       padding-left: 0px;
   }
 
-/* ================ Ajustes para o Sidebar de la pagina principal ===============*/
+/* ================ Ajustes para o Sidebar de la pagina Resultados ===============*/
 /* Cambia el color de los números de meses del slider a blanco */
 .sidebar-range-slider .rc-slider-mark-text {
   color: white;
@@ -153,7 +184,7 @@ div.Select-control {
   top: 0;
   right: 0;
   bottom: 0;
-  width: 3rem;
+  width: 2.9rem;
   height: 3rem;
   padding: 10px 0px 0px 12px;
   margin: 0px;
